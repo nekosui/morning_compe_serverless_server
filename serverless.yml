@@ -24,7 +24,14 @@ provider:
   name: aws
   runtime: nodejs12.x
   lambdaHashingVersion: 20201221
+  stage: ${opt:stage, self:custom.defaultStage}
 
+custom:
+  defaultStage: dev
+  otherfile:
+    environment:
+      dev: ${file(./env/dev.yml)}
+      prod: ${file(./env/prd.yml)}
 plugins:
   - serverless-offline
 
@@ -66,6 +73,12 @@ functions:
     handler: handler.hello
     events:
     - http: GET /
+  getUrl:
+    handler: handler.getUrl
+    events:
+      - http: GET /get_url
+  
+
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details

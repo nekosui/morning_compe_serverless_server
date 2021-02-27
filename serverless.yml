@@ -28,10 +28,9 @@ provider:
 
 custom:
   defaultStage: dev
-  otherfile:
-    environment:
-      dev: ${file(./env/dev.yml)}
-      prod: ${file(./env/prd.yml)}
+  environment:
+    dev: ${file(./env/dev.yml)}
+    prod: ${file(./env/prd.yml)}
 plugins:
   - serverless-offline
 
@@ -74,10 +73,16 @@ functions:
     events:
     - http: GET /
   getUrl:
-    handler: handler.getUrl
+    handler: twitter.getUrl
+    environment: ${self:custom.environment.${self:provider.stage}}
     events:
       - http: GET /get_url
   
+  getAccessToken:
+    handler: twitter.getAccessToken
+    environment: ${self:custom.environment.${self:provider.stage}}
+    events:
+      - http: POST /get_access_token
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events

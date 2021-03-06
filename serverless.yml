@@ -11,7 +11,7 @@
 #
 # Happy Coding!
 
-service: morningcompetition-serverless-server
+service: morning-compe
 # app and org for use with dashboard.serverless.com
 #app: your-app-name
 #org: your-org-name
@@ -25,12 +25,27 @@ provider:
   runtime: nodejs12.x
   lambdaHashingVersion: 20201221
   stage: ${opt:stage, self:custom.defaultStage}
+  region: ap-northeast-1
+  apiKeys:
+    - free: # 使用量プラン
+      - name: ${opt:stage, self:provider.stage}-free-key # key 名
+        value: a123456789012345678901234567890
+  usagePlan:
+    - free:
+        quota:
+          limit: 1000 # API の呼び出しを行える最大回数
+          offset: 2 # API の呼び出し回数の初期値（通常は 0 回を指定する）
+          period: MONTH # DAY or WEEK or MONTH
+        throttle:
+          rateLimit: 2 # 1 秒あたりに処理できる API リクエスト数
+          burstLimit: 3 # 同時に処理できる最大リクエスト数
 
 custom:
   defaultStage: dev
   environment:
     dev: ${file(./env/dev.yml)}
-    prod: ${file(./env/prd.yml)}
+    prod: ${file(./env/prod.yml)}
+
 plugins:
   - serverless-offline
 
@@ -69,20 +84,36 @@ plugins:
 
 functions:
   hello:
-    handler: handler.hello
+    handler: functions/handler.hello
     events:
-    - http: GET /
+      - http: 
+          method: GET
+          path: /
+          private: true
+  getEnv:
+    handler: functions/twitter/index.getEnv
+    environment: ${self:custom.environment.${self:provider.stage}}
+    events:
+      - http: 
+          method: GET 
+          path: /get_env
+          private: true
   getUrl:
-    handler: twitter.getUrl
+    handler: functions/twitter/index.getUrl
     environment: ${self:custom.environment.${self:provider.stage}}
     events:
-      - http: GET /get_url
-  
+      - http: 
+          method: GET 
+          path: /get_url
+          private: true
   getAccessToken:
-    handler: twitter.getAccessToken
+    handler: functions/twitter/index.getAccessToken
     environment: ${self:custom.environment.${self:provider.stage}}
     events:
-      - http: POST /get_access_token
+      - http: 
+          method: POST 
+          path: /get_access_token
+          private: true 
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
